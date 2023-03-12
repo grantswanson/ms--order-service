@@ -19,10 +19,10 @@ public class OrderLineItems {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY) //EAGER is the default
-    @JoinColumn(name = "order_id", referencedColumnName="id")
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
     private Order order;
 
-    @Column(name="skucode")
+    @Column(name = "skucode")
     private String skuCode;
     private BigDecimal price;
     private Integer quantity;

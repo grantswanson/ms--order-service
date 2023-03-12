@@ -5,11 +5,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import javax.annotation.PostConstruct;
 
 @Configuration
 @EnableWebSecurity
-public class  SecurityConfig   {
+public class SecurityConfig {
 
     /* This enables security in this service and prevents unauthorized access
      * It also grabs the JTW token and makes it later available in the application context
@@ -26,5 +29,14 @@ public class  SecurityConfig   {
         http.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
         return http.build();
+    }
+
+    /* make the security context available on the threads spawned by resilience4j
+    (as part of the circuit breaker patter)
+    Otherwise the circuit breaker losses the security context and fails when calling another service.
+    */
+    @PostConstruct
+    public void enableAuthenticatinoContextOnSpawnedThreads() {
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
     }
 }
